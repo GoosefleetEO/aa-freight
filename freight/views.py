@@ -11,6 +11,7 @@ from django.utils.html import format_html
 from django.utils.timezone import now
 from esi.decorators import token_required
 from esi.models import Token
+from eveuniverse.models import EveEntity
 
 from allianceauth.authentication.models import CharacterOwnership
 from allianceauth.eveonline.models import EveCharacter, EveCorporationInfo
@@ -25,7 +26,7 @@ from .app_settings import (
 )
 from .forms import CalculatorForm
 from .helpers import update_or_create_eve_entity_from_evecharacter
-from .models import Contract, ContractHandler, EveEntity, Freight, Location, Pricing
+from .models import Contract, ContractHandler, Freight, Location, Pricing
 
 logger = LoggerAddTag(get_extension_logger(__name__), __title__)
 

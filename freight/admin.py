@@ -6,7 +6,6 @@ from .models import (
     Contract,
     ContractCustomerNotification,
     ContractHandler,
-    EveEntity,
     Location,
     Pricing,
 )
@@ -210,17 +209,6 @@ if settings.DEBUG:
 
     @admin.register(ContractCustomerNotification)
     class ContractCustomerNotificationAdmin(admin.ModelAdmin):
-        def has_add_permission(self, *args, **kwargs):
-            return False
-
-        def has_change_permission(self, *args, **kwargs):
-            return False
-
-    @admin.register(EveEntity)
-    class EveEntityAdmin(admin.ModelAdmin):
-        list_display = ("name", "category")
-        list_filter = ("category",)
-
         def has_add_permission(self, *args, **kwargs):
             return False
 

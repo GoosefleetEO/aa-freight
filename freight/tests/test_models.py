@@ -8,6 +8,7 @@ from django.core.exceptions import ValidationError
 from django.utils.timezone import now
 from esi.errors import TokenExpiredError, TokenInvalidError
 from esi.models import Token
+from eveuniverse.models import EveEntity
 
 from allianceauth.authentication.models import CharacterOwnership
 from allianceauth.eveonline.models import EveCharacter, EveCorporationInfo
@@ -27,7 +28,6 @@ from freight.models import (
     Contract,
     ContractCustomerNotification,
     ContractHandler,
-    EveEntity,
     Freight,
     Location,
     Pricing,
@@ -1423,52 +1423,6 @@ class TestContractsSync(NoSocketsTestCase):
         self.assertEqual(
             handler.last_error_message_friendly, ContractHandler.ERRORS_LIST[7][1]
         )
-
-
-class TestEveEntity(NoSocketsTestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        create_entities_from_characters()
-        cls.alliance = EveEntity.objects.get(id=93000001)
-        cls.corporation = EveEntity.objects.get(id=92000001)
-        cls.character = EveEntity.objects.get(id=90000001)
-
-    def test_str(self):
-        self.assertEqual(str(self.character), "Bruce Wayne")
-
-    def test_repr(self):
-        expected = (
-            "EveEntity(id={}, " "category='character', " "name='Bruce Wayne')"
-        ).format(self.character.id)
-        self.assertEqual(repr(self.character), expected)
-
-    def test_is_alliance(self):
-        self.assertFalse(self.character.is_alliance)
-        self.assertFalse(self.corporation.is_alliance)
-        self.assertTrue(self.alliance.is_alliance)
-
-    def test_is_corporation(self):
-        self.assertFalse(self.character.is_corporation)
-        self.assertTrue(self.corporation.is_corporation)
-        self.assertFalse(self.alliance.is_corporation)
-
-    def test_is_character(self):
-        self.assertTrue(self.character.is_character)
-        self.assertFalse(self.corporation.is_character)
-        self.assertFalse(self.alliance.is_character)
-
-    def test_avatar_url_alliance(self):
-        expected = "https://images.evetech.net/alliances/93000001/logo?size=128"
-        self.assertEqual(self.alliance.icon_url(), expected)
-
-    def test_avatar_url_corporation(self):
-        expected = "https://images.evetech.net/corporations/92000001/logo?size=128"
-        self.assertEqual(self.corporation.icon_url(), expected)
-
-    def test_avatar_url_character(self):
-        expected = "https://images.evetech.net/characters/90000001/portrait?size=128"
-        self.assertEqual(self.character.icon_url(), expected)
 
 
 class TestContractCustomerNotification(NoSocketsTestCase):

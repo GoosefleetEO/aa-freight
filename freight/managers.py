@@ -9,9 +9,9 @@ from django.contrib.auth.models import User
 from django.db import models, transaction
 from django.utils.timezone import now
 from esi.models import Token
+from eveuniverse.models import EveEntity
 
 from allianceauth.eveonline.models import EveCharacter, EveCorporationInfo
-from allianceauth.eveonline.providers import ObjectNotFound
 from allianceauth.services.hooks import get_extension_logger
 from app_utils.logging import LoggerAddTag
 
@@ -114,32 +114,6 @@ class LocationManager(models.Manager):
                     "category_id": Location.Category.STRUCTURE_ID,
                 },
             )
-
-
-class EveEntityManager(models.Manager):
-    def get_or_create_esi(self, *, id: int) -> Tuple[models.Model, bool]:
-        """gets or creates entity object with data fetched from ESI"""
-        from .models import EveEntity
-
-        try:
-            entity = self.get(id=id)
-            return entity, False
-        except EveEntity.DoesNotExist:
-            return self.update_or_create_esi(id=id)
-
-    def update_or_create_esi(self, *, id: int) -> Tuple[models.Model, bool]:
-        """updates or creates entity object with data fetched from ESI"""
-        response = esi.client.Universe.post_universe_names(ids=[id]).results()
-        if len(response) != 1:
-            raise ObjectNotFound(id, "unknown_type")
-        entity_data = response[0]
-        return self.update_or_create(
-            id=entity_data["id"],
-            defaults={
-                "name": entity_data["name"],
-                "category": entity_data["category"],
-            },
-        )
 
 
 class ContractQuerySet(models.QuerySet):
@@ -316,8 +290,6 @@ class ContractManagerBase(models.Manager):
         return start_location, end_location
 
     def _identify_contracts_acceptor(self, contract: dict) -> tuple:
-        from .models import EveEntity
-
         if int(contract["acceptor_id"]) != 0:
             try:
                 entity, _ = EveEntity.objects.get_or_create_esi(

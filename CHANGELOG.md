@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased] - yyyy-mm-dd
 
+## [2.0.0-DEV] - tbd
+
+### Changed
+
+- Replaced proprietary EveEntity with eveuniverse pendant
+
 ## [1.7.1] - 2022-09-07
 
 ### Changed

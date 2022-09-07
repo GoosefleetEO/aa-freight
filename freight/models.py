@@ -15,13 +15,10 @@ from django.utils.functional import classproperty
 from django.utils.timezone import now
 from esi.errors import TokenExpiredError, TokenInvalidError
 from esi.models import Token
+from eveuniverse.models import EveEntity
 
 from allianceauth.authentication.models import CharacterOwnership, User
-from allianceauth.eveonline.models import (
-    EveAllianceInfo,
-    EveCharacter,
-    EveCorporationInfo,
-)
+from allianceauth.eveonline.models import EveCharacter, EveCorporationInfo
 from allianceauth.notifications import notify
 from allianceauth.services.hooks import get_extension_logger
 from app_utils.datetime import DATETIME_FORMAT
@@ -50,7 +47,7 @@ from .app_settings import (
     FREIGHT_OPERATION_MODES,
 )
 from .constants import AVATAR_SIZE
-from .managers import ContractManager, EveEntityManager, LocationManager, PricingManager
+from .managers import ContractManager, LocationManager, PricingManager
 from .providers import esi
 
 if "discord" in app_labels():
@@ -503,58 +500,6 @@ class Pricing(models.Model):
         if len(issues) == 0:
             return None
         return issues
-
-
-class EveEntity(models.Model):
-    """An Eve entity like a corporation or a character"""
-
-    CATEGORY_ALLIANCE = "alliance"
-    CATEGORY_CHARACTER = "character"
-    CATEGORY_CORPORATION = "corporation"
-
-    CATEGORY_CHOICES = (
-        (CATEGORY_ALLIANCE, "Alliance"),
-        (CATEGORY_CORPORATION, "Corporation"),
-        (CATEGORY_CHARACTER, "Character"),
-    )
-
-    id = models.IntegerField(primary_key=True, validators=[MinValueValidator(0)])
-    category = models.CharField(max_length=32, choices=CATEGORY_CHOICES)
-    name = models.CharField(max_length=254)
-
-    objects = EveEntityManager()
-
-    def __str__(self):
-        return self.name
-
-    def __repr__(self) -> str:
-        return "{}(id={}, category='{}', name='{}')".format(
-            self.__class__.__name__, self.id, self.category, self.name
-        )
-
-    @property
-    def is_alliance(self) -> bool:
-        return self.category == self.CATEGORY_ALLIANCE
-
-    @property
-    def is_corporation(self) -> bool:
-        return self.category == self.CATEGORY_CORPORATION
-
-    @property
-    def is_character(self) -> bool:
-        return self.category == self.CATEGORY_CHARACTER
-
-    def icon_url(self, size=AVATAR_SIZE) -> str:
-        """Url to an icon image for this organization."""
-        if self.category == self.CATEGORY_ALLIANCE:
-            return EveAllianceInfo.generic_logo_url(self.id, size=size)
-        elif self.category == self.CATEGORY_CORPORATION:
-            return EveCorporationInfo.generic_logo_url(self.id, size=size)
-        elif self.category == self.CATEGORY_CHARACTER:
-            return EveCharacter.generic_portrait_url(self.id, size=size)
-        raise NotImplementedError(
-            "Avatar URL not implemented for category %s" % self.category
-        )
 
 
 class ContractHandler(models.Model):
