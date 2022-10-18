@@ -18,6 +18,7 @@ This release includes a major change to Freight's database structure and therefo
 Please follow these instructions for updating Freight 1.x. If you are already on 2.x and just installing a patch you can ignore these special instructions:
 
 1. Make sure you are on the latest stable version of Freight (1.7.1). If not please fully upgrade first: `pip install aa-freight==1.7.1` & migrate & restart
+1. Freight now requires [django-eveuniverse](https://gitlab.com/ErikKalkoken/django-eveuniverse). Please install it now in case it is not yet installed on your system.
 1. Make sure your current AA installation has no errors: `python manage.py check`
 1. Shut down your AA instance completely: `sudo supervisorctl stop myauth:`
 1. Backup your AA database: `sudo mysqldump alliance_auth -u root > alliance_auth_backup.sql`
