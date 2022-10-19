@@ -107,11 +107,8 @@ class ContractHandlerAdmin(admin.ModelAdmin):
     @admin.display(description="Fetch contracts from Eve Online server")
     def start_sync(self, request, queryset):
         for obj in queryset:
-            tasks.run_contracts_sync.delay(force_sync=True, user_pk=request.user.pk)
-            text = (
-                f"Started syncing contracts for: {obj} "
-                "You will receive a report once it is completed."
-            )
+            tasks.run_contracts_sync.delay(force_sync=True)
+            text = f"Started syncing contracts for: {obj}"
             self.message_user(request, text)
 
     @admin.display(description="Send notifications for outstanding contracts")

@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased] - yyyy-mm-dd
 
-## [2.0.0-DEV] - tbd
+## [2.0.0-ALPHA] - tbd
 
 This release includes a major change to Freight's database structure and therefore requires some additional care when updating. Therefore please follow our special update instructions below.
 
@@ -35,6 +35,8 @@ Please follow these instructions for updating Freight 1.x. If you are already on
 - Replaced proprietary EveEntity with eveuniverse pendant
 - Dropped support for Python 3.7
 - Added support for Python 3.10
+- Allow tasks to fail on exceptions instead of catching and tracking them
+- Will no longer send notifications to users after adding contract handler
 
 ## [1.7.1] - 2022-09-07
 

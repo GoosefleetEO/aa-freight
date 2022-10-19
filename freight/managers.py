@@ -290,56 +290,36 @@ class ContractManagerBase(models.Manager):
         return start_location, end_location
 
     def _identify_contracts_acceptor(self, contract: dict) -> tuple:
-        if int(contract["acceptor_id"]) != 0:
+        if int(contract["acceptor_id"]) == 0:
+            return None, None  # no acceptor
+        entity, _ = EveEntity.objects.get_or_create_esi(id=contract["acceptor_id"])
+        if entity.is_character:
             try:
-                entity, _ = EveEntity.objects.get_or_create_esi(
-                    id=contract["acceptor_id"]
+                acceptor = EveCharacter.objects.get(character_id=entity.id)
+            except EveCharacter.DoesNotExist:
+                acceptor = EveCharacter.objects.create_character(character_id=entity.id)
+            try:
+                acceptor_corporation = EveCorporationInfo.objects.get(
+                    corporation_id=acceptor.corporation_id
                 )
-                if entity.is_character:
-                    try:
-                        acceptor = EveCharacter.objects.get(character_id=entity.id)
-                    except EveCharacter.DoesNotExist:
-                        acceptor = EveCharacter.objects.create_character(
-                            character_id=entity.id
-                        )
-                    try:
-                        acceptor_corporation = EveCorporationInfo.objects.get(
-                            corporation_id=acceptor.corporation_id
-                        )
-                    except EveCorporationInfo.DoesNotExist:
-                        acceptor_corporation = (
-                            EveCorporationInfo.objects.create_corporation(
-                                corp_id=acceptor.corporation_id
-                            )
-                        )
-                elif entity.is_corporation:
-                    acceptor = None
-                    try:
-                        acceptor_corporation = EveCorporationInfo.objects.get(
-                            corporation_id=entity.id
-                        )
-                    except EveCorporationInfo.DoesNotExist:
-                        acceptor_corporation = (
-                            EveCorporationInfo.objects.create_corporation(
-                                corp_id=entity.id
-                            )
-                        )
-                else:
-                    raise ValueError(
-                        "Acceptor has invalid category: {}".format(entity.category)
-                    )
-
-            except Exception:
-                logger.exception(
-                    "%s: Failed to identify acceptor for this contract",
-                    contract["contract_id"],
-                    exc_info=True,
+            except EveCorporationInfo.DoesNotExist:
+                acceptor_corporation = EveCorporationInfo.objects.create_corporation(
+                    corp_id=acceptor.corporation_id
                 )
-                acceptor = None
-                acceptor_corporation = None
-        else:
+        elif entity.is_corporation:
             acceptor = None
-            acceptor_corporation = None
+            try:
+                acceptor_corporation = EveCorporationInfo.objects.get(
+                    corporation_id=entity.id
+                )
+            except EveCorporationInfo.DoesNotExist:
+                acceptor_corporation = EveCorporationInfo.objects.create_corporation(
+                    corp_id=entity.id
+                )
+        else:
+            raise ValueError(
+                "Acceptor has invalid category: {}".format(entity.category)
+            )
         return acceptor, acceptor_corporation
 
     def _identify_contracts_issuer(self, contract) -> tuple:
@@ -362,7 +342,7 @@ class ContractManagerBase(models.Manager):
     def send_notifications(
         self, force_sent: bool = False, rate_limited: bool = True
     ) -> None:
-        """Send notifications for outstanding contracts that have pricing"""
+        """Send notifications for outstanding contracts that have pricing."""
         from .models import Pricing
 
         if (

@@ -301,7 +301,6 @@ def setup_contract_handler(request, token):
         organization, _ = update_or_create_eve_entity_from_evecharacter(
             token_char, Freight.category_for_operation_mode(FREIGHT_OPERATION_MODE)
         )
-
         handler, _ = ContractHandler.objects.update_or_create(
             organization=organization,
             defaults={
@@ -309,7 +308,7 @@ def setup_contract_handler(request, token):
                 "operation_mode": FREIGHT_OPERATION_MODE,
             },
         )
-        tasks.run_contracts_sync.delay(force_sync=True, user_pk=request.user.pk)
+        tasks.run_contracts_sync.delay(force_sync=True)
         messages.success(
             request,
             format_html(
@@ -317,8 +316,7 @@ def setup_contract_handler(request, token):
                 "<strong>{}</strong> organization "
                 "with <strong>{}</strong> as sync character. "
                 "Operation mode: <strong>{}</strong>. "
-                "Started syncing of courier contracts. "
-                "You will receive a report once it is completed.",
+                "Started syncing of courier contracts. ",
                 organization.name,
                 handler.character.character.character_name,
                 handler.operation_mode_friendly,

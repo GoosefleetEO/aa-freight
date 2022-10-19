@@ -574,49 +574,11 @@ class TestContractManagerCreateFromDict(NoSocketsTestCase):
             EveCorporationInfo.objects.get(corporation_id=92000002),
         )
 
-    @patch(MANAGERS_PATH + ".EveCharacter.objects.create_character")
-    def test_sets_acceptor_to_none_if_it_cant_be_created(self, mock_create_character):
-        mock_create_character.side_effect = RuntimeError
-        EveEntity.objects.create(
-            id=90000987, name="Dummy", category=EveEntity.CATEGORY_CHARACTER
-        )
-        contract_dict = {
-            "acceptor_id": 90000987,
-            "assignee_id": 90000987,
-            "availability": "personal",
-            "buyout": None,
-            "collateral": 50000000.0,
-            "contract_id": 149409014,
-            "date_accepted": datetime(2019, 10, 3, 23, tzinfo=utc),
-            "date_completed": None,
-            "date_expired": datetime(2019, 10, 30, 23, tzinfo=utc),
-            "date_issued": datetime(2019, 10, 2, 23, tzinfo=utc),
-            "days_to_complete": 3,
-            "end_location_id": 1022167642188,
-            "for_corporation": False,
-            "issuer_corporation_id": 92000002,
-            "issuer_id": 90000003,
-            "price": 0.0,
-            "reward": 25000000.0,
-            "start_location_id": 60003760,
-            "status": "in_progress",
-            "title": "demo contract",
-            "type": "courier",
-            "volume": 115000.0,
-        }
-        obj, created = Contract.objects.update_or_create_from_dict(
-            self.handler, contract_dict, Mock()
-        )
-        self.assertTrue(created)
-        self.assertEqual(obj.contract_id, 149409014)
-        self.assertIsNone(obj.acceptor)
-        self.assertIsNone(obj.acceptor_corporation)
-
 
 if "discord" in app_labels():
 
     @patch(MODELS_PATH + ".FREIGHT_HOURS_UNTIL_STALE_STATUS", 48)
-    @patch(MODELS_PATH + ".dhooks_lite.Webhook.execute", autospec=True)
+    @patch(MODELS_PATH + ".dhooks_lite.Webhook.execute", spec=True)
     class TestContractManagerNotifications(NoSocketsTestCase):
         @classmethod
         def setUpClass(cls):
